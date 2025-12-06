@@ -1,234 +1,91 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tontine - Prototype</title>
-    <style>
-      :root{--bg:#f6f8fb;--card:#fff;--muted:#6b7280;--accent:#2563eb}
-      body{font-family:Inter,Segoe UI,Arial;margin:0;background:var(--bg);color:#111}
-      .app{display:grid;grid-template-columns:260px 1fr 320px;gap:18px;padding:20px}
-      .card{background:var(--card);border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(16,24,40,.06)}
-      h1{margin:0 0 8px;font-size:18px}
-      label{display:block;font-size:13px;margin-top:8px;color:var(--muted)}
-      input,select,button{width:100%;padding:8px;margin-top:6px;border:1px solid #e6e9ef;border-radius:6px}
-      button{background:var(--accent);color:#fff;border:none;cursor:pointer}
-      .muted{color:var(--muted);font-size:13px}
-      .groups-list{display:flex;flex-direction:column;gap:8px}
-      .group-item{padding:10px;border-radius:6px;background:#f8fafc;cursor:pointer}
-      .group-item.active{outline:2px solid rgba(37,99,235,.12)}
-      table{width:100%;border-collapse:collapse;margin-top:8px}
-      th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left}
-      .small{font-size:13px}
-      .controls{display:flex;gap:8px}
-      .notice{padding:8px;background:#fffbeb;border-left:4px solid #f59e0b;border-radius:4px;margin-top:8px}
-      .footer{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
-    </style>
-  </head>
-  <body>
-    <div style="padding:14px 20px 0 20px">
-      <h1>Tontine — Prototype interactif</h1>
-      <p class="muted">Simulation locale : pas d'intégration paiement. Données sauvegardées dans le navigateur.</p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b5fff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <title>Tontine — Mobile</title>
+  <style>
+    :root{--bg:#ffffff;--brand:#0b5fff;--muted:#6b7280}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:#111}
+    .container{max-width:480px;margin:0 auto;padding:16px}
+    header{display:flex;align-items:center;gap:12px}
+    h1{font-size:18px;margin:0}
+    .card{background:#fff;border-radius:12px;padding:12px;margin-top:12px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    label{font-size:13px;color:var(--muted);display:block;margin-top:8px}
+    input,select,button{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ececec}
+    button{background:var(--brand);color:white;border:none}
+    .row{display:flex;gap:8px}
+    .member-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+    .member{padding:10px;background:#f8fafc;border-radius:8px;display:flex;justify-content:space-between}
+    .small{font-size:13px;color:var(--muted)}
+    .next{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Tontine — Mobile</h1>
+        <div class="small">Prototype mobile-friendly</div>
+      </div>
+    </header>
+
+    <div class="card">
+      <label>Créer un groupe</label>
+      <div class="row"><input id="gname" placeholder="Nom du groupe" /><button id="gcreate">Créer</button></div>
+      <div id="groups" class="member-list"></div>
     </div>
 
-    <div class="app">
-      <div class="card">
-        <h2>Groupes</h2>
-        <div style="display:flex;gap:8px">
-          <input id="newGroupName" placeholder="Nom du groupe" />
-          <button id="createGroupBtn">Créer</button>
-        </div>
-        <div class="groups-list" id="groupsList" style="margin-top:12px"></div>
-        <div style="margin-top:12px">
-          <label class="small">Importer / Exporter</label>
-          <div class="controls">
-            <button id="exportBtn">Exporter JSON</button>
-            <input id="importFile" type="file" accept="application/json" />
-          </div>
-        </div>
-      </div>
-
-      <div class="card" id="mainArea">
-        <div id="emptyState">
-          <p class="muted">Sélectionnez un groupe à gauche ou créez-en un nouveau.</p>
-        </div>
-        <div id="groupView" style="display:none">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <h2 id="groupTitle"></h2>
-              <div class="muted" id="groupMeta"></div>
-            </div>
-            <div style="width:320px">
-              <label>Montant de la cotisation</label>
-              <input id="contributionAmount" type="number" min="0" />
-            </div>
-          </div>
-
-          <hr />
-          <div style="display:flex;gap:14px">
-            <div style="flex:1">
-              <h3>Membres</h3>
-              <div style="display:flex;gap:8px">
-                <input id="memberName" placeholder="Nom membre" />
-                <button id="addMemberBtn">Ajouter</button>
-              </div>
-              <table id="membersTable"><thead><tr><th>Nom</th><th>Contact</th><th></th></tr></thead><tbody></tbody></table>
-            </div>
-
-            <div style="width:300px">
-              <h3>Cycle / Tours</h3>
-              <label>Fréquence</label>
-              <select id="frequency"><option value="weekly">Hebdomadaire</option><option value="monthly">Mensuel</option></select>
-              <label class="small">Ordre du tour</label>
-              <div class="muted small">L'ordre default est l'ordre d'ajout; vous pouvez le mélanger.</div>
-              <div style="display:flex;gap:8px;margin-top:8px">
-                <button id="startCycleBtn">Démarrer cycle</button>
-                <button id="shuffleBtn">Mélanger ordre</button>
-              </div>
-              <div class="notice" id="cycleNotice" style="display:none"></div>
-            </div>
-          </div>
-
-          <hr />
-          <h3>Historique cotisations</h3>
-          <table id="paymentsTable"><thead><tr><th>Date</th><th>Membre</th><th>Montant</th><th>Tour</th><th></th></tr></thead><tbody></tbody></table>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Prochain bénéficiaire</h2>
-        <div id="nextBeneficiary" style="min-height:120px;display:flex;flex-direction:column;justify-content:center;align-items:center">
-          <div class="muted">Aucun groupe sélectionné</div>
-        </div>
-        <div style="margin-top:12px">
-          <label>Simuler paiement</label>
-          <select id="payMemberSelect"></select>
-          <button id="recordPaymentBtn">Enregistrer paiement</button>
-        </div>
-        <div style="margin-top:12px">
-          <button id="advanceTourBtn">Passer au tour suivant</button>
-        </div>
-        <div class="footer">Prototype — données locales</div>
-      </div>
+    <div class="card">
+      <label>Membres</label>
+      <div class="row"><input id="mname" placeholder="Nom membre" /><button id="madd">Ajouter</button></div>
+      <div id="members" class="member-list"></div>
     </div>
 
-    <script>
-      // Small prototype: data model stored in localStorage
-      const STORAGE_KEY = 'tontine_demo_v1';
-      let app = { groups: [], selectedGroupId: null };
+    <div class="card">
+      <label>Montant cotisation</label>
+      <input id="amount" type="number" placeholder="Ex: 5000" />
+      <label>Prochain bénéficiaire</label>
+      <div class="next" id="nextBox"><div class="small">Aucun cycle démarré</div></div>
+      <div class="row"><button id="startCycle">Démarrer cycle</button><button id="shuffle">Mélanger</button></div>
+    </div>
 
-      function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(app)) }
-      function load(){ const s = localStorage.getItem(STORAGE_KEY); app = s ? JSON.parse(s) : { groups:[], selectedGroupId:null } }
+    <div class="card">
+      <label>Simuler paiement</label>
+      <select id="paySelect"></select>
+      <button id="pay">Enregistrer paiement</button>
+    </div>
 
-      function uid(){ return Math.random().toString(36).slice(2,9) }
+  </div>
 
-      // UI bindings
-      const groupsList = document.getElementById('groupsList');
-      const createGroupBtn = document.getElementById('createGroupBtn');
-      const newGroupName = document.getElementById('newGroupName');
-      const exportBtn = document.getElementById('exportBtn');
-      const importFile = document.getElementById('importFile');
+  <script>
+    // Minimal mobile demo: local-only
+    const storageKey = 'tontine_mobile_demo_v1';
+    let state = { groups: [], selected: null };
+    function uid(){ return Math.random().toString(36).slice(2,9) }
+    function save(){ localStorage.setItem(storageKey, JSON.stringify(state)) }
+    function load(){ const s=localStorage.getItem(storageKey); state = s?JSON.parse(s):{groups:[],selected:null} }
+    load(); renderGroups(); renderMembers(); renderNext();
 
-      const groupView = document.getElementById('groupView');
-      const emptyState = document.getElementById('emptyState');
-      const groupTitle = document.getElementById('groupTitle');
-      const groupMeta = document.getElementById('groupMeta');
-      const contributionAmount = document.getElementById('contributionAmount');
-      const memberName = document.getElementById('memberName');
-      const addMemberBtn = document.getElementById('addMemberBtn');
-      const membersTable = document.querySelector('#membersTable tbody');
-      const paymentsTable = document.querySelector('#paymentsTable tbody');
-      const frequency = document.getElementById('frequency');
-      const startCycleBtn = document.getElementById('startCycleBtn');
-      const shuffleBtn = document.getElementById('shuffleBtn');
-      const cycleNotice = document.getElementById('cycleNotice');
+    document.getElementById('gcreate').onclick = ()=>{ const name = document.getElementById('gname').value.trim(); if(!name) return alert('Nom requis'); const g={id:uid(),name,members:[],contribution:0,cycle:null,payments:[]}; state.groups.push(g); state.selected=g.id; save(); renderGroups(); renderMembers(); document.getElementById('gname').value=''}
+    function renderGroups(){ const el=document.getElementById('groups'); el.innerHTML=''; state.groups.forEach(g=>{ const d=document.createElement('div'); d.className='member'; d.textContent=g.name; d.onclick=()=>{ state.selected=g.id; save(); renderMembers(); renderNext() }; if(state.selected===g.id) d.style.outline='2px solid rgba(11,95,255,0.12)'; el.appendChild(d) }) }
 
-      const nextBeneficiary = document.getElementById('nextBeneficiary');
-      const payMemberSelect = document.getElementById('payMemberSelect');
-      const recordPaymentBtn = document.getElementById('recordPaymentBtn');
-      const advanceTourBtn = document.getElementById('advanceTourBtn');
+    document.getElementById('madd').onclick = ()=>{ const g = curGroup(); if(!g) return alert('Sélectionnez un groupe'); const name=document.getElementById('mname').value.trim(); if(!name) return alert('Nom requis'); const m={id:uid(),name}; g.members.push(m); save(); renderMembers(); document.getElementById('mname').value='' }
+    function curGroup(){ return state.groups.find(x=>x.id===state.selected) }
+    function renderMembers(){ const g=curGroup(); const el=document.getElementById('members'); el.innerHTML=''; const paySel=document.getElementById('paySelect'); paySel.innerHTML=''; if(!g) return; g.members.forEach(m=>{ const d=document.createElement('div'); d.className='member'; d.innerHTML=`<div>${m.name}</div><div class="small">ID: ${m.id}</div>`; el.appendChild(d); const o=document.createElement('option'); o.value=m.id; o.textContent=m.name; paySel.appendChild(o) }) }
 
-      // Load app
-      load(); renderGroups(); if(app.selectedGroupId) selectGroup(app.selectedGroupId)
+    document.getElementById('startCycle').onclick = ()=>{ const g=curGroup(); if(!g) return alert('Sélectionnez un groupe'); if(g.members.length<2) return alert('Ajoutez au moins 2 membres'); g.cycle = { order: g.members.map(m=>m.id), idx:0 }; save(); renderNext(); }
+    document.getElementById('shuffle').onclick = ()=>{ const g=curGroup(); if(!g||!g.cycle) return alert('Démarrez le cycle'); g.cycle.order.sort(()=>Math.random()-0.5); g.cycle.idx=0; save(); renderNext(); }
 
-      createGroupBtn.onclick = () => {
-        const name = newGroupName.value.trim(); if(!name) return alert('Nommez le groupe');
-        const g = { id: uid(), name, createdAt: Date.now(), members: [], contribution: 0, cycle: null, payments: [] }
-        app.groups.push(g); app.selectedGroupId = g.id; save(); renderGroups(); selectGroup(g.id); newGroupName.value=''
-      }
+    function renderNext(){ const el=document.getElementById('nextBox'); const g=curGroup(); if(!g||!g.cycle){ el.innerHTML='<div class="small">Aucun cycle démarré</div>'; return } const id=g.cycle.order[g.cycle.idx%g.cycle.order.length]; const m=g.members.find(x=>x.id===id); el.innerHTML=`<div style="font-weight:600">${m?m.name:'?'}</div><div class="small">Montant: ${g.contribution||document.getElementById('amount').value||0}</div>` }
 
-      function renderGroups(){ groupsList.innerHTML='';
-        app.groups.forEach(g=>{
-          const el = document.createElement('div'); el.className='group-item'+(app.selectedGroupId===g.id?' active':''); el.textContent = g.name; el.onclick = ()=>{ app.selectedGroupId=g.id; save(); renderGroups(); selectGroup(g.id) }
-          groupsList.appendChild(el)
-        })
-      }
-
-      function selectGroup(id){ const g = app.groups.find(x=>x.id===id); if(!g) return;
-        document.getElementById('emptyState').style.display='none'; document.getElementById('groupView').style.display='block';
-        groupTitle.textContent = g.name; groupMeta.textContent = 'Créé le ' + new Date(g.createdAt).toLocaleDateString(); contributionAmount.value = g.contribution || '';
-        renderMembers(g); renderPayments(g); renderCycle(g); renderNext(g);
-      }
-
-      contributionAmount.onchange = ()=>{ const g = currentGroup(); if(!g) return; g.contribution = Number(contributionAmount.value)||0; save(); renderNext(g) }
-
-      addMemberBtn.onclick = ()=>{
-        const g = currentGroup(); if(!g) return; const name = memberName.value.trim(); if(!name) return alert('Nom requis');
-        g.members.push({ id: uid(), name, contact: '' }); memberName.value=''; save(); renderMembers(g); renderNext(g)
-      }
-
-      function renderMembers(g){ membersTable.innerHTML=''; g.members.forEach(m=>{
-        const tr = document.createElement('tr'); tr.innerHTML = `<td>${m.name}</td><td class="small">${m.contact||''}</td><td><button data-id="${m.id}">Suppr</button></td>`;
-        tr.querySelector('button').onclick = ()=>{ if(!confirm('Supprimer membre ?')) return; g.members = g.members.filter(x=>x.id!==m.id); save(); renderMembers(g); renderNext(g); renderPayments(g) }
-        membersTable.appendChild(tr)
-      })
-        // update pay select
-        payMemberSelect.innerHTML = '';
-        g.members.forEach(m=>{ const o = document.createElement('option'); o.value=m.id; o.textContent=m.name; payMemberSelect.appendChild(o) })
-      }
-
-      function renderPayments(g){ paymentsTable.innerHTML=''; g.payments.forEach(p=>{
-        const tr = document.createElement('tr'); tr.innerHTML = `<td>${new Date(p.date).toLocaleString()}</td><td>${memberNameById(g,p.memberId)||'?'}</td><td>${p.amount}</td><td>${p.round||''}</td><td><button data-id="${p.id}">Annuler</button></td>`;
-        tr.querySelector('button').onclick = ()=>{ if(!confirm('Annuler ce paiement ?')) return; g.payments = g.payments.filter(x=>x.id!==p.id); save(); renderPayments(g); renderNext(g) }
-        paymentsTable.appendChild(tr)
-      }) }
-
-      function currentGroup(){ return app.groups.find(x=>x.id===app.selectedGroupId) }
-
-      function memberNameById(g,id){ const m = g.members.find(x=>x.id===id); return m?m.name:'' }
-
-      startCycleBtn.onclick = ()=>{
-        const g = currentGroup(); if(!g) return; if(g.members.length<2) return alert('Ajoutez au moins 2 membres');
-        // create cycle: order = current members order
-        g.cycle = { id: uid(), order: g.members.map(m=>m.id), index: 0, frequency: frequency.value, startedAt: Date.now() }
-        cycleNotice.style.display='block'; cycleNotice.textContent = 'Cycle démarré — ' + g.cycle.order.length + ' membres'; save(); renderCycle(g); renderNext(g)
-      }
-
-      shuffleBtn.onclick = ()=>{ const g = currentGroup(); if(!g) return; if(!g.cycle) return alert("Démarrez le cycle d'abord");
-        g.cycle.order = g.cycle.order.sort(()=>Math.random()-0.5); g.cycle.index = 0; save(); renderCycle(g); renderNext(g);
-      }
-
-      function renderCycle(g){ if(!g.cycle){ cycleNotice.style.display='none'; return }
-        cycleNotice.style.display='block'; cycleNotice.textContent = `Cycle actif — tour ${g.cycle.index+1} / ${g.cycle.order.length} — fréquence: ${g.cycle.frequency}` }
-
-      function renderNext(g){ if(!g.cycle || g.cycle.order.length===0){ nextBeneficiary.innerHTML = '<div class="muted">Cycle non démarré</div>'; return }
-        const id = g.cycle.order[g.cycle.index % g.cycle.order.length]; const name = memberNameById(g,id);
-        nextBeneficiary.innerHTML = `<div style="font-weight:600;font-size:18px">${name}</div><div class="muted small">Montant: ${g.contribution||0}</div>`
-      }
-
-      recordPaymentBtn.onclick = ()=>{ const g = currentGroup(); if(!g) return; const memberId = payMemberSelect.value; if(!memberId) return alert('Choisir un membre');
-        const amount = g.contribution || Number(prompt('Montant payé', g.contribution||0)) || 0;
-        g.payments.push({ id: uid(), memberId, amount, date: Date.now(), round: (g.cycle?g.cycle.index+1:null) }); save(); renderPayments(g); renderNext(g)
-      }
-
-      advanceTourBtn.onclick = ()=>{ const g = currentGroup(); if(!g || !g.cycle) return; g.cycle.index = (g.cycle.index+1) % g.cycle.order.length; save(); renderCycle(g); renderNext(g) }
-
-      exportBtn.onclick = ()=>{ const data = JSON.stringify(app, null, 2); const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='tontine_export.json'; a.click(); URL.revokeObjectURL(url) }
-
-      importFile.onchange = e=>{ const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = ev=>{ try{ const parsed = JSON.parse(ev.target.result); app = parsed; save(); renderGroups(); if(app.selectedGroupId) selectGroup(app.selectedGroupId) }catch(err){ alert('Fichier invalide') } }; r.readAsText(f) }
-
-      // quick helpers
-      (function autosaveOnUnload(){ window.addEventListener('beforeunload', save) })();
-    </script>
-  </body>
+    document.getElementById('pay').onclick = ()=>{ const g=curGroup(); if(!g) return alert('Sélectionnez un groupe'); const memberId=document.getElementById('paySelect').value; if(!memberId) return alert('Choisir un membre'); const amount = Number(document.getElementById('amount').value)||0; g.payments.push({id:uid(),memberId,amount,date:Date.now()}); alert('Paiement enregistré (simulé)'); save(); }
+  </script>
+</body>
 </html>
